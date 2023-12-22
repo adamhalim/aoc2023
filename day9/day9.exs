@@ -1,37 +1,51 @@
 defmodule Day9 do
   def part_one(input) do
-    String.split(input, "\n")
-    |> Enum.map(&calculate_differences/1)
-  end
+    lines = String.split(input, "\n")
 
-  def calculations(values) do
-    Enum.map(values, fn pair ->
-      a = String.to_integer(Enum.at(pair, 0))
-      b = String.to_integer(Enum.at(pair, 1))
-      abs(a - b)
+    Enum.map(lines, fn line ->
+      calculate_differences(line, [])
     end)
   end
 
-  def calculate_differences(line) do
-    differences =
-      String.split(line, " ")
-      |> Enum.chunk_every(2)
-      |> Enum.map(fn pair ->
-        a = String.to_integer(Enum.at(pair, 0))
-        b = String.to_integer(Enum.at(pair, 1))
-        abs(a - b)
-      end)
-      |> IO.inspect()
+  def calculate_differences(line, []) do
+    history =
+      String.split(line, " ", trim: true)
+      |> Enum.map(&String.to_integer/1)
 
-    calculate_differences(differences, 0)
+    differences = calculate_differences(history)
+    done_with_differences(differences, List.last(differences))
+    |> IO.inspect()
   end
 
-  def calculate_differences(values, value) do
-    if 0 not in values do
-      value + List.last(values)
+  def calculate_differences([_head | _tail = []], differences) do
+    differences
+  end
+
+  def calculate_differences([head | tail], differences) do
+    difference = abs(head - List.first(tail))
+    calculate_differences(tail, [difference | differences])
+  end
+
+  def calculate_differences([head | tail]) do
+    difference = abs(head - List.first(tail))
+    calculate_differences(tail, [difference])
+  end
+
+  def done_with_differences(differences, sum) do
+    IO.inspect(differences)
+    if 0 not in differences do
+      calculate_differences(differences)
     else
+      sum
     end
   end
+
+  # def calculate_differences(values, value) do
+  #   if 0 not in values do
+  #     value + List.last(values)
+  #   else
+  #   end
+  # end
 end
 
 {_, input} = File.read(Enum.at(System.argv(), 0))
